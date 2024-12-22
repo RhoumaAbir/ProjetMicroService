@@ -1,0 +1,76 @@
+version: "3.8"
+
+services:
+  subject-service:
+    container_name: subject-service
+    image: subject-service
+    build:
+      context: ./subjectManagement
+      dockerfile: Dockerfile 
+    ports:
+      - "8087:8087"
+    hostname: subject
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://docker-mysql:3306/subjectDB2?createDatabaseIfNotExist=true&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
+    depends_on:
+      - discovery-service
+      - docker-mysql
+  assignment-service:
+    container_name: assignment-service
+    image: assignment-service
+    build:
+      context: ./hadil
+      dockerfile: Dockerfile 
+    ports:
+      - "8084:8084"
+    hostname: assignment
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://docker-mysql:3306/assignmentDB2?createDatabaseIfNotExist=true&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
+    depends_on:
+      - discovery-service
+      - docker-mysql
+
+  professor-service:
+    container_name: professor-service
+    image: professor-service
+    build:
+      context: ./wala
+      dockerfile: Dockerfile 
+    ports:
+      - "8081:8081"
+    hostname: professor
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://docker-mysql:3306/professorDB2?createDatabaseIfNotExist=true&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
+    depends_on:
+      - discovery-service
+      - docker-mysql
+
+
+  # MySQL Service (docker-mysql) - Laissez-le si nécessaire pour d'autres services
+  docker-mysql:
+    container_name: docker-mysql
+    image: "mysql:5.6"
+    environment:
+      - MYSQL_DATABASE=microdb
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  # Service Eureka Discovery
+  discovery-service:
+    container_name: discovery-service
+    build: ./eurekaServer
+    ports:
+      - "8761:8761"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
+
+
+# Volumes pour persistance de données
+volumes:
+  mysql_data:

@@ -1,0 +1,75 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: student-service
+          uri: lb://student-service
+          predicates:
+            - Path=/students/**
+        - id: assignment-service
+          uri: lb://assignment-service
+          predicates:
+            - Path=/assignments/**
+        - id: cours-service
+          uri: lb://cours-service
+          predicates:
+            - Path=/api/assignments/**
+        - id: level-service
+          uri: lb://level-service
+          predicates:
+            - Path=/level/**
+        - id: subject-service
+          uri: lb://subject-service
+          predicates:
+            - Path=/subject/**
+        - id: professor-service
+          uri: lb://professor-service
+          predicates:
+            - Path=/professor/**
+        - id: evaluation-service
+          uri: lb://evaluation-service
+          predicates:
+            - Path=/evaluation/**
+        - id: session-service
+          uri: lb://session-service
+          predicates:
+            - Path=/session/**
+
+    # Enables service discovery with Eureka
+    discovery:
+      locator:
+        enabled: true  # Service discovery via Eureka to route traffic dynamically
+
+  # Configuration for Zipkin integration (through Micrometer Tracing)
+  zipkin:
+    base-url: http://localhost:9411  # URL of your Zipkin server
+  tracings:
+    enabled: true
+    tracer:
+      sampler:
+        probability: 1.0  # Traces 100% of requests (can be adjusted as needed)
+
+# Eureka configuration (if using Eureka for service discovery)
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/  # URL of your Eureka Server
+
+# Feign Client configuration for inter-service communication
+feign:
+  client:
+    config:
+      default:
+        errorDecoder: com.example.demo.feign.CustomErrorDecoder  # Custom error decoder for Feign
+  enabled: true
+  request:
+    timeout:
+      connect: 1000  # Connection timeout in ms
+      read: 1000     # Read timeout in ms
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.web.client: DEBUG
+    org.springframework.cloud.netflix.eureka: DEBUG
+    com.netflix.discovery: DEBUG
